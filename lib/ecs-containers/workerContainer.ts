@@ -1,20 +1,15 @@
 import { Construct } from 'constructs';
-import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
-import { ContainerProps } from './ContainerTypes';
+import { ContainerProps } from './containerTypes';
+import { WORKERS_URI } from '../../utils/processEnvironment';
 
-export class WContainer extends Construct {
+export class WorkersContainer extends Construct {
   constructor(scope: Construct, id: string, props: ContainerProps) {
     super(scope, id);
 
-    const wRepo = ecr.Repository.fromRepositoryArn(
-      this,
-      'EcrWRepo',
-      'arn:aws:ecr:us-east-1:866973358190:repository/workers'
-    );
-    const wImage = ecs.ContainerImage.fromEcrRepository(wRepo);
+    const workersImage = ecs.ContainerImage.fromRegistry(WORKERS_URI);
 
-    const wServiceTaskDef = new ecs.FargateTaskDefinition(
+    const workersServiceTaskDef = new ecs.FargateTaskDefinition(
       this,
       'wService_TaskDef',
       {
@@ -23,26 +18,27 @@ export class WContainer extends Construct {
       }
     );
 
-    const wServiceContainer = wServiceTaskDef.addContainer(
+    const workersServiceContainer = workersServiceTaskDef.addContainer(
       'wService_Container',
       {
         containerName: 'wServiceContainer',
-        image: wImage,
+        image: workersImage,
         memoryLimitMiB: 1024,
         logging: ecs.LogDriver.awsLogs({ streamPrefix: 'wService' }),
         environment: {
-          DATABASE_CONNECTION_STRING:
-            'postgresql://docker:nothing-but-net13@ingress_db:5432/function_schema',
-          GRAPHILE_CONNECTION_STRING:
-            'postgresql://docker:nothing-but-net13@ingress_db:5432/graphile',
+          DATABASE_ENDPOINT: '/function_schema',
+          GRAPHILE_ENDPOINT: '/graphile',
           FUNCTION_SERVER_URL: 'http://ingress_fn:3000/calls',
+        },
+        secrets: {
+          DB_SECRET: ecs.Secret.fromSecretsManager(props.secret),
         },
       }
     );
 
-    const wService = new ecs.FargateService(this, 'wService', {
+    const workersService = new ecs.FargateService(this, 'wService', {
       cluster: props.cluster,
-      taskDefinition: wServiceTaskDef,
+      taskDefinition: workersServiceTaskDef,
       serviceName: 'wService',
       securityGroups: [props.servicesSecurityGroup],
       serviceConnectConfiguration: {

@@ -4,6 +4,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as secretsManager from 'aws-cdk-lib/aws-secretsmanager';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import { POSTGRES_USER } from '../../utils/processEnvironment';
 
 export interface RDSConstructProps {
   readonly vpc: ec2.Vpc;
@@ -30,8 +31,8 @@ export class RdsConstruct extends Construct {
 
     this.securityGroup.connections.allowFrom(
       ec2.Peer.anyIpv4(),
-      ec2.Port.allTraffic(),
-      'Allow all traffic on all ports'
+      ec2.Port.tcp(5432),
+      'Allow all traffic on port 5432'
     );
 
     // secret to be used as credentials for our database
@@ -42,7 +43,7 @@ export class RdsConstruct extends Construct {
         secretName: `database-credentials`,
         generateSecretString: {
           secretStringTemplate: JSON.stringify({
-            username: 'postgres',
+            username: POSTGRES_USER,
           }),
           excludePunctuation: true,
           includeSpace: false,
@@ -83,7 +84,6 @@ export class RdsConstruct extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       deletionProtection: false,
       databaseName: 'function_schema',
-      publiclyAccessible: true,
       credentials: rds.Credentials.fromSecret(this.databaseCredentialsSecret),
     });
   }

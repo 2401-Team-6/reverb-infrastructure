@@ -1,21 +1,16 @@
 import { Construct } from 'constructs';
-import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
-import { ContainerProps } from './ContainerTypes';
-import { Port } from 'aws-cdk-lib/aws-ec2';
+import { ContainerProps } from './containerTypes';
+import { Peer, Port } from 'aws-cdk-lib/aws-ec2';
+import { INGRESS_URI } from '../../utils/processEnvironment';
 
-export class IContainer extends Construct {
+export class IngressContainer extends Construct {
   constructor(scope: Construct, id: string, props: ContainerProps) {
     super(scope, id);
 
-    const iRepo = ecr.Repository.fromRepositoryArn(
-      this,
-      'EcrIRepo',
-      'arn:aws:ecr:us-east-1:866973358190:repository/ingress'
-    );
-    const iImage = ecs.ContainerImage.fromEcrRepository(iRepo);
+    const ingressImage = ecs.ContainerImage.fromRegistry(INGRESS_URI);
 
-    const iServiceTaskDef = new ecs.FargateTaskDefinition(
+    const ingressServiceTaskDef = new ecs.FargateTaskDefinition(
       this,
       'iService_TaskDef',
       {
@@ -24,30 +19,32 @@ export class IContainer extends Construct {
       }
     );
 
-    const iServiceContainer = iServiceTaskDef.addContainer(
+    const ingressServiceContainer = ingressServiceTaskDef.addContainer(
       'iService_Container',
       {
         containerName: 'iServiceContainer',
-        image: iImage,
+        image: ingressImage,
         memoryLimitMiB: 1024,
         logging: ecs.LogDriver.awsLogs({ streamPrefix: 'iService' }),
         environment: {
-          GRAPHILE_CONNECTION_STRING:
-            'postgresql://docker:nothing-but-net13@ingress_db:5432/graphile',
+          GRAPHILE_ENDPOINT: '/graphile',
+        },
+        secrets: {
+          DB_SECRET: ecs.Secret.fromSecretsManager(props.secret),
         },
       }
     );
 
-    iServiceContainer.addPortMappings({
+    ingressServiceContainer.addPortMappings({
       name: 'api',
       containerPort: 3000,
       protocol: ecs.Protocol.TCP,
     });
 
-    const iService = new ecs.FargateService(this, 'iService', {
+    const ingressService = new ecs.FargateService(this, 'iService', {
       assignPublicIp: true,
       cluster: props.cluster,
-      taskDefinition: iServiceTaskDef,
+      taskDefinition: ingressServiceTaskDef,
       serviceName: 'iService',
       securityGroups: [props.servicesSecurityGroup],
       serviceConnectConfiguration: {
@@ -59,7 +56,7 @@ export class IContainer extends Construct {
       },
     });
 
-    iService.connections.allowFromAnyIpv4(
+    ingressService.connections.allowFromAnyIpv4(
       Port.tcp(3000),
       'allow incoming from 3000'
     );
