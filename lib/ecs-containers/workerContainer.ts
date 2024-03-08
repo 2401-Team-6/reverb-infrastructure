@@ -41,13 +41,7 @@ export class WorkersContainer extends Construct {
       taskDefinition: workersServiceTaskDef,
       serviceName: 'wService',
       securityGroups: [props.servicesSecurityGroup],
-      serviceConnectConfiguration: {
-        namespace: props.namespace.namespaceName,
-        logDriver: ecs.LogDrivers.awsLogs({
-          streamPrefix: 'wService-traffic',
-        }),
-        services: [],
-      },
     });
+    workersService.enableServiceConnect();
   }
 }

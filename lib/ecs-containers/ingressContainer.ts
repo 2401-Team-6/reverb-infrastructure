@@ -47,13 +47,6 @@ export class IngressContainer extends Construct {
       taskDefinition: ingressServiceTaskDef,
       serviceName: 'iService',
       securityGroups: [props.servicesSecurityGroup],
-      serviceConnectConfiguration: {
-        namespace: props.namespace.namespaceName,
-        logDriver: ecs.LogDrivers.awsLogs({
-          streamPrefix: 'iService-traffic',
-        }),
-        services: [],
-      },
     });
 
     ingressService.connections.allowFromAnyIpv4(
