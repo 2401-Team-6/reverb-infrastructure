@@ -6,6 +6,7 @@ import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
+
 export class IngressCdkStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
