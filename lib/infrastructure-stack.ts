@@ -1,12 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as ecs from 'aws-cdk-lib/aws-ecs';
 
 import { Construct } from 'constructs';
-import { DbContainer } from './ecs-containers/dbContainer';
-import { FnContainer } from './ecs-containers/fnContainer';
-import { WContainer } from './ecs-containers/wContainer';
-import { IContainer } from './ecs-containers/iContainer';
+import { InitializedRdsConstruct } from './rds/initializedRdsConstruct';
+import { EcsConstruct } from './ecs-containers/ecsContainer';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class InfrastructureStack extends cdk.Stack {
@@ -14,49 +11,16 @@ export class InfrastructureStack extends cdk.Stack {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, 'VPC', { maxAzs: 2 });
-    const cluster = new ecs.Cluster(this, 'Cluster', {
-      clusterName: 'ingress-services',
+
+    const database = new InitializedRdsConstruct(this, 'ingress-postgres', {
       vpc,
+      availabilityZone: vpc.availabilityZones[0],
     });
 
-    const namespace = cluster.addDefaultCloudMapNamespace({
-      name: 'ingress-services',
+    const ecs = new EcsConstruct(this, 'ingress-ecs', {
       vpc,
-      useForServiceConnect: true,
+      secret: database.secret,
     });
-
-    const servicesSecurityGroup = new ec2.SecurityGroup(
-      this,
-      'servicesSecuirtyGroup',
-      { vpc, allowAllOutbound: true }
-    );
-
-    const databaseContainer = new DbContainer(this, 'DatabaseContainer', {
-      namespace,
-      cluster,
-      vpc,
-      servicesSecurityGroup,
-    });
-
-    const functionContainer = new FnContainer(this, 'FunctionContainer', {
-      namespace,
-      cluster,
-      vpc,
-      servicesSecurityGroup,
-    });
-
-    const workersContainer = new WContainer(this, 'WorkersContainer', {
-      namespace,
-      cluster,
-      vpc,
-      servicesSecurityGroup,
-    });
-
-    const ingressContainer = new IContainer(this, 'IngressContainer', {
-      namespace,
-      cluster,
-      vpc,
-      servicesSecurityGroup,
-    });
+    ecs.node.addDependency(database);
   }
 }

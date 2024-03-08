@@ -2,18 +2,14 @@ import { Construct } from 'constructs';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { ContainerProps } from './ContainerTypes';
+import { ContainerProps } from './containerTypes';
+import { FUNCTIONS_URI } from '../../utils/processEnvironment';
 
 export class FnContainer extends Construct {
   constructor(scope: Construct, id: string, props: ContainerProps) {
     super(scope, id);
 
-    const fnRepo = ecr.Repository.fromRepositoryArn(
-      this,
-      'EcrFnRepo',
-      'arn:aws:ecr:us-east-1:866973358190:repository/functions'
-    );
-    const fnImage = ecs.ContainerImage.fromEcrRepository(fnRepo);
+    const fnImage = ecs.ContainerImage.fromRegistry(FUNCTIONS_URI);
 
     const fnServiceTaskDef = new ecs.FargateTaskDefinition(
       this,
@@ -32,8 +28,10 @@ export class FnContainer extends Construct {
         memoryLimitMiB: 1024,
         logging: ecs.LogDriver.awsLogs({ streamPrefix: 'fnService' }),
         environment: {
-          DATABASE_CONNECTION_STRING:
-            'postgresql://docker:nothing-but-net13@ingress_db:5432/function_schema',
+          DATABASE_ENDPOINT: '/function_schema',
+        },
+        secrets: {
+          DB_SECRET: ecs.Secret.fromSecretsManager(props.secret),
         },
       }
     );
