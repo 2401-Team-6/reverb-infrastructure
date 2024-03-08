@@ -7,6 +7,11 @@ import { DbContainer } from './ecs-containers/dbContainer';
 import { FnContainer } from './ecs-containers/fnContainer';
 import { WContainer } from './ecs-containers/wContainer';
 import { IContainer } from './ecs-containers/iContainer';
+import { RdsConstruct } from './rds/rdsConstruct';
+import { DbCustomResource } from './rds/dbCustomResource';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { DockerImageCode } from 'aws-cdk-lib/aws-lambda';
+import { InitializedRdsConstruct } from './rds/initializedRdsConstruct';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class InfrastructureStack extends cdk.Stack {
@@ -14,6 +19,12 @@ export class InfrastructureStack extends cdk.Stack {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, 'VPC', { maxAzs: 2 });
+
+    const database = new InitializedRdsConstruct(this, 'ingress-postgres', {
+      vpc,
+      availabilityZone: vpc.availabilityZones[0],
+    });
+
     const cluster = new ecs.Cluster(this, 'Cluster', {
       clusterName: 'ingress-services',
       vpc,
