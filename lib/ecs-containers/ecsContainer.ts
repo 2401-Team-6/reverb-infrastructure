@@ -51,12 +51,12 @@ export class EcsConstruct extends Construct {
       secret,
     });
 
-    const ingressContainer = new IngressContainer(this, 'IngressContainer', {
-      namespace,
-      cluster,
-      vpc,
-      servicesSecurityGroup,
-      secret,
-    });
+    // const ingressContainer = new IngressContainer(this, 'IngressContainer', {
+    //   namespace,
+    //   cluster,
+    //   vpc,
+    //   servicesSecurityGroup,
+    //   secret,
+    // });
   }
 }

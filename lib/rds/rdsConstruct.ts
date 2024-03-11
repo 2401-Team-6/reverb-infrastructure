@@ -15,6 +15,7 @@ export class RdsConstruct extends Construct {
   public rds: rds.DatabaseInstance;
   public databaseCredentialsSecret: secretsManager.Secret;
   public securityGroup: ec2.SecurityGroup;
+  public proxy: rds.DatabaseProxy;
 
   constructor(scope: Construct, id: string, props?: RDSConstructProps) {
     super(scope, id);
@@ -72,7 +73,6 @@ export class RdsConstruct extends Construct {
         ec2.InstanceClass.BURSTABLE3,
         ec2.InstanceSize.MICRO
       ),
-      availabilityZone: props.availabilityZone,
       securityGroups: [this.securityGroup],
       multiAz: false,
       allocatedStorage: 100,
@@ -85,6 +85,14 @@ export class RdsConstruct extends Construct {
       deletionProtection: false,
       databaseName: 'function_schema',
       credentials: rds.Credentials.fromSecret(this.databaseCredentialsSecret),
+    });
+
+    this.proxy = new rds.DatabaseProxy(this, 'events-rds-proxy', {
+      vpc: props.vpc,
+      proxyTarget: rds.ProxyTarget.fromInstance(this.rds),
+      secrets: [this.databaseCredentialsSecret],
+      securityGroups: [this.securityGroup],
+      clientPasswordAuthType: rds.ClientPasswordAuthType.POSTGRES_SCRAM_SHA_256,
     });
   }
 }

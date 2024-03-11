@@ -5,13 +5,14 @@ import * as cdk from 'aws-cdk-lib';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { DockerImageCode } from 'aws-cdk-lib/aws-lambda';
 import { DbCustomResource } from './dbCustomResource';
-import { DatabaseInstance } from 'aws-cdk-lib/aws-rds';
+import { DatabaseInstance, DatabaseProxy } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
 export class InitializedRdsConstruct extends Construct {
   public rds: DatabaseInstance;
   public securityGroup: ec2.SecurityGroup;
   public secret: Secret;
+  public proxy: DatabaseProxy;
 
   constructor(
     scope: Construct,
@@ -27,6 +28,7 @@ export class InitializedRdsConstruct extends Construct {
     });
     this.rds = database.rds;
     this.secret = database.databaseCredentialsSecret;
+    this.proxy = database.proxy;
 
     this.securityGroup = new ec2.SecurityGroup(
       this,
