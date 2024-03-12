@@ -1,18 +1,18 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
-import { Client } from "pg";
-import * as AWS from "aws-sdk";
+import { APIGatewayProxyHandler } from 'aws-lambda';
+import { Client } from 'pg';
+import * as AWS from 'aws-sdk';
 const secretsManager = new AWS.SecretsManager();
 
-export const handler: APIGatewayProxyHandler = async event => {
+export const handler: APIGatewayProxyHandler = async (event) => {
   if (
     !event.body ||
-    typeof event.body !== "string" ||
+    typeof event.body !== 'string' ||
     JSON.parse(event.body).name === undefined
   ) {
     return {
       statusCode: 400,
-      headers: { "Content-Type": "text/plain" },
-      body: "Invalid event request.",
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Invalid event request.',
     };
   }
 
@@ -22,11 +22,11 @@ export const handler: APIGatewayProxyHandler = async event => {
   let secretValue;
   try {
     const data = await secretsManager
-      .getSecretValue({ SecretId: secretArn || "" })
+      .getSecretValue({ SecretId: secretArn || '' })
       .promise();
-    secretValue = JSON.parse(data.SecretString || "");
+    secretValue = JSON.parse(data.SecretString || '');
     if (!secretValue) {
-      throw new Error("Error retrieving secret.");
+      throw new Error('Error retrieving secret.');
     }
   } catch (err) {
     console.log(err);
@@ -50,23 +50,18 @@ export const handler: APIGatewayProxyHandler = async event => {
       `SELECT graphile_worker.add_job('process_event', $1,'event_processing_queue');`,
       [eventBody]
     );
-    // await client.query(
-    //   "CREATE TABLE IF NOT EXISTS events (id serial PRIMARY KEY, name varchar(30) UNIQUE NOT NULL);"
-    // );
-    // await client.query(`INSERT INTO events (name) VALUES ($1);`, [
-    //   eventBody.name,
-    // ]);
+
     return {
       statusCode: 200,
-      headers: { "Content-Type": "text/plain" },
-      body: "Event processed.",
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Event processed.',
     };
   } catch (err) {
     console.log(err);
     return {
       statusCode: 500,
-      headers: { "Content-Type": "text/plain" },
-      body: "Error processing event.",
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'Error processing event.',
     };
   } finally {
     client.end();

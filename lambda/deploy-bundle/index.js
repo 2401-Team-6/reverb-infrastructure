@@ -46,12 +46,12 @@ var handler = function (event) { return __awaiter(void 0, void 0, void 0, functi
         switch (_a.label) {
             case 0:
                 if (!event.body ||
-                    typeof event.body !== "string" ||
+                    typeof event.body !== 'string' ||
                     JSON.parse(event.body).name === undefined) {
                     return [2 /*return*/, {
                             statusCode: 400,
-                            headers: { "Content-Type": "text/plain" },
-                            body: "Invalid event request.",
+                            headers: { 'Content-Type': 'text/plain' },
+                            body: 'Invalid event request.',
                         }];
                 }
                 eventBody = JSON.parse(event.body);
@@ -60,13 +60,13 @@ var handler = function (event) { return __awaiter(void 0, void 0, void 0, functi
             case 1:
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, secretsManager
-                        .getSecretValue({ SecretId: secretArn || "" })
+                        .getSecretValue({ SecretId: secretArn || '' })
                         .promise()];
             case 2:
                 data = _a.sent();
-                secretValue = JSON.parse(data.SecretString || "");
+                secretValue = JSON.parse(data.SecretString || '');
                 if (!secretValue) {
-                    throw new Error("Error retrieving secret.");
+                    throw new Error('Error retrieving secret.');
                 }
                 return [3 /*break*/, 4];
             case 3:
@@ -101,16 +101,16 @@ var handler = function (event) { return __awaiter(void 0, void 0, void 0, functi
                 // ]);
                 return [2 /*return*/, {
                         statusCode: 200,
-                        headers: { "Content-Type": "text/plain" },
-                        body: "Event processed.",
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: 'Event processed.',
                     }];
             case 8:
                 err_2 = _a.sent();
                 console.log(err_2);
                 return [2 /*return*/, {
                         statusCode: 500,
-                        headers: { "Content-Type": "text/plain" },
-                        body: "Error processing event.",
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: 'Error processing event.',
                     }];
             case 9:
                 client.end();
