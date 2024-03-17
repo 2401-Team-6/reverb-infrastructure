@@ -38,35 +38,35 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
 var pg_1 = require("pg");
+var uuid_1 = require("uuid");
 var AWS = require("aws-sdk");
 var secretsManager = new AWS.SecretsManager();
 var handler = function (event) { return __awaiter(void 0, void 0, void 0, function () {
-    var eventBody, secretArn, secretValue, data, err_1, client, err_2;
+    var secretArn, secretValue, data, err_1, eventPayload, eventId, client, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 if (!event.body ||
-                    typeof event.body !== 'string' ||
+                    typeof event.body !== "string" ||
                     JSON.parse(event.body).name === undefined) {
                     return [2 /*return*/, {
                             statusCode: 400,
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: 'Invalid event request.',
+                            headers: { "Content-Type": "text/plain" },
+                            body: "Invalid event request.",
                         }];
                 }
-                eventBody = JSON.parse(event.body);
                 secretArn = process.env.RDS_SECRET_ARN;
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, secretsManager
-                        .getSecretValue({ SecretId: secretArn || '' })
+                        .getSecretValue({ SecretId: secretArn || "" })
                         .promise()];
             case 2:
                 data = _a.sent();
-                secretValue = JSON.parse(data.SecretString || '');
+                secretValue = JSON.parse(data.SecretString || "");
                 if (!secretValue) {
-                    throw new Error('Error retrieving secret.');
+                    throw new Error("Error retrieving secret.");
                 }
                 return [3 /*break*/, 4];
             case 3:
@@ -74,6 +74,9 @@ var handler = function (event) { return __awaiter(void 0, void 0, void 0, functi
                 console.log(err_1);
                 throw err_1;
             case 4:
+                eventPayload = JSON.parse(event.body);
+                eventId = (0, uuid_1.v4)();
+                eventPayload.id = eventId;
                 client = new pg_1.Client({
                     host: process.env.RDS_PROXY_URL,
                     port: process.env.RDS_PORT ? +process.env.RDS_PORT : 5432,
@@ -90,27 +93,21 @@ var handler = function (event) { return __awaiter(void 0, void 0, void 0, functi
                 return [4 /*yield*/, client.connect()];
             case 6:
                 _a.sent();
-                return [4 /*yield*/, client.query("SELECT graphile_worker.add_job('process_event', $1,'event_processing_queue');", [eventBody])];
+                return [4 /*yield*/, client.query("SELECT graphile_worker.add_job('process_event', $1,'event_processing_queue');", [eventPayload])];
             case 7:
                 _a.sent();
-                // await client.query(
-                //   "CREATE TABLE IF NOT EXISTS events (id serial PRIMARY KEY, name varchar(30) UNIQUE NOT NULL);"
-                // );
-                // await client.query(`INSERT INTO events (name) VALUES ($1);`, [
-                //   eventBody.name,
-                // ]);
                 return [2 /*return*/, {
                         statusCode: 200,
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: 'Event processed.',
+                        headers: { "Content-Type": "text/plain" },
+                        body: "Event processed.",
                     }];
             case 8:
                 err_2 = _a.sent();
                 console.log(err_2);
                 return [2 /*return*/, {
                         statusCode: 500,
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: 'Error processing event.',
+                        headers: { "Content-Type": "text/plain" },
+                        body: "Error processing event.",
                     }];
             case 9:
                 client.end();
