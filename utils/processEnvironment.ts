@@ -1,11 +1,12 @@
-import { config } from 'dotenv';
+import { config } from "dotenv";
 config();
 
-export const FUNCTIONS_URI =
-  process.env.FUNCTION_SERVER_IMAGE || 'quasari/functions';
+if (!process.env.FUNCTIONS_SERVER_IMAGE) {
+  throw new Error(
+    "Please provide your function server image repo in an environmental variable: FUNCTION_SERVER_IMAGE"
+  );
+}
+
+export const FUNCTIONS_URI = process.env.FUNCTIONS_SERVER_IMAGE as string;
 export const WORKERS_URI =
-  process.env.WORKERS_SERVER_IMAGE || 'quasari/workers';
-export const INGRESS_URI =
-  process.env.INGRESS_SERVER_IMAGE || 'quasari/ingress';
-export const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
-export const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD as string;
+  process.env.WORKERS_SERVER_IMAGE || "quasari/workers";

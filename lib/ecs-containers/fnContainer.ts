@@ -1,9 +1,9 @@
-import { Construct } from 'constructs';
-import * as ecr from 'aws-cdk-lib/aws-ecr';
-import * as ecs from 'aws-cdk-lib/aws-ecs';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { ContainerProps } from './containerTypes';
-import { FUNCTIONS_URI } from '../../utils/processEnvironment';
+import { Construct } from "constructs";
+import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import { ContainerProps } from "./containerTypes";
+import { FUNCTIONS_URI } from "../../utils/processEnvironment";
 
 export class FnContainer extends Construct {
   constructor(scope: Construct, id: string, props: ContainerProps) {
@@ -13,7 +13,7 @@ export class FnContainer extends Construct {
 
     const fnServiceTaskDef = new ecs.FargateTaskDefinition(
       this,
-      'fnService_TaskDef',
+      "fn-service-taskDef",
       {
         cpu: 512,
         memoryLimitMiB: 1024,
@@ -21,43 +21,43 @@ export class FnContainer extends Construct {
     );
 
     const fnServiceContainer = fnServiceTaskDef.addContainer(
-      'fnService_Container',
+      "fn-service-container",
       {
-        containerName: 'fnServiceContainer',
+        containerName: "fn-service-container",
         image: fnImage,
         memoryLimitMiB: 1024,
-        logging: ecs.LogDriver.awsLogs({ streamPrefix: 'fnService' }),
+        logging: ecs.LogDriver.awsLogs({ streamPrefix: "fnService" }),
         environment: {
-          DATABASE_ENDPOINT: '/function_schema',
+          GRAPHILE_ENDPOINT: "/graphile",
         },
         secrets: {
-          DB_SECRET: ecs.Secret.fromSecretsManager(props.secret),
+          DB_SECRET: ecs.Secret.fromSecretsManager(props.rdsSecret),
         },
       }
     );
 
     fnServiceContainer.addPortMappings({
-      name: 'functions',
+      name: "functions",
       containerPort: 3000,
       protocol: ecs.Protocol.TCP,
     });
 
-    const fnService = new ecs.FargateService(this, 'fnService', {
+    const fnService = new ecs.FargateService(this, "fn-service", {
       cluster: props.cluster,
       taskDefinition: fnServiceTaskDef,
-      serviceName: 'fnService',
+      serviceName: "fn-service",
       securityGroups: [props.servicesSecurityGroup],
       serviceConnectConfiguration: {
         namespace: props.namespace.namespaceName,
         logDriver: ecs.LogDrivers.awsLogs({
-          streamPrefix: 'fnService-traffic',
+          streamPrefix: "fn-service-traffic",
         }),
         services: [
           {
-            portMappingName: 'functions',
-            dnsName: 'ingress_fn',
+            portMappingName: "functions",
+            dnsName: "reverb_fn",
             port: 3000,
-            discoveryName: 'ingress_fn',
+            discoveryName: "reverb_fn",
           },
         ],
       },
@@ -66,7 +66,7 @@ export class FnContainer extends Construct {
     fnService.connections.allowFrom(
       props.servicesSecurityGroup,
       ec2.Port.tcp(3000),
-      'Allow traffic within security group on 3000'
+      "Allow traffic within security group on 3000"
     );
   }
 }

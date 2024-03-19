@@ -1,6 +1,6 @@
 {
   "name": "infrastructure",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "bin": {
     "infrastructure": "bin/infrastructure.js"
   },
@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "prepare": "cd lambda && npm run build"
+    "prepare": "cd lambda && npm run build && cd ../"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
