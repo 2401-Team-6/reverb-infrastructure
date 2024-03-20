@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf deploy-bundle && npm install && npx tsc index.ts && mkdir deploy-bundle && mv index.js deploy-bundle && cp -R node_modules deploy-bundle"
+    "build": "rm -rf deploy-bundle && rm -rf node_modules && npm install && npx tsc index.ts && mkdir deploy-bundle && mv index.js deploy-bundle && cp -R node_modules deploy-bundle"
   },
   "keywords": [],
   "author": "",
