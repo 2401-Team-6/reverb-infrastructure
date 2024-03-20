@@ -40,7 +40,7 @@ export class InitializedRdsConstruct extends Construct {
       "initializer-custom-resource",
       {
         fnLogRetention: RetentionDays.ONE_DAY,
-        fnCode: Code.fromAsset(`${__dirname}/rds-init-fn-code`),
+        fnCode: Code.fromAsset("lambda/initDb"),
         fnTimeout: cdk.Duration.minutes(5),
         securityGroups: [this.securityGroup],
         config: {

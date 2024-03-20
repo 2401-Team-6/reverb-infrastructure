@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "cdk": "cdk",
-    "prepare": "cd lambda/events && npm run build && cd ../../lib/rds/rds-init-fn-code && rm -rf node_modules && npm install",
+    "prepare": "cd lambda/events && npm run build && cd ../initDb && rm -rf node_modules && npm install",
     "deploy": "npm run prepare && cdk deploy",
     "synth": "npm run prepare && cdk synth"
   },
