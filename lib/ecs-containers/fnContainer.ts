@@ -63,6 +63,15 @@ export class FnContainer extends Construct {
       },
     });
 
+    const scalableTarget = fnService.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: 10,
+    });
+
+    scalableTarget.scaleOnCpuUtilization("fn-scaling", {
+      targetUtilizationPercent: 75,
+    });
+
     fnService.connections.allowFrom(
       props.servicesSecurityGroup,
       ec2.Port.tcp(3000),

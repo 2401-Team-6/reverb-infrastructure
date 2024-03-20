@@ -60,6 +60,15 @@ export class WorkersContainer extends Construct {
       },
     });
 
+    const scalableTarget = workersService.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: 5,
+    });
+
+    scalableTarget.scaleOnCpuUtilization("workers-scaling", {
+      targetUtilizationPercent: 75,
+    });
+
     workersService.node.addDependency(props.mongoConstruct);
   }
 }

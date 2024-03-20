@@ -62,7 +62,7 @@ export class RdsConstruct extends Construct {
       engine,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.BURSTABLE3,
-        ec2.InstanceSize.MICRO
+        ec2.InstanceSize.SMALL
       ),
       securityGroups: [this.securityGroup],
       multiAz: false,
