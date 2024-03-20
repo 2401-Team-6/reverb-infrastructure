@@ -26,7 +26,7 @@ export class ReverbStack extends cdk.Stack {
       vpc: vpc,
       securityGroups: [rdsDatabase.securityGroup],
       runtime: Runtime.NODEJS_20_X,
-      code: Code.fromAsset("lambda/deploy-bundle"),
+      code: Code.fromAsset("lambda/events/deploy-bundle"),
       handler: "index.handler",
       environment: {
         RDS_PROXY_URL: rdsDatabase.proxy.endpoint,

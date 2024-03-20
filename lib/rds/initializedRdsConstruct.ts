@@ -3,7 +3,7 @@ import { RDSConstructProps, RdsConstruct } from "./rdsConstruct";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as cdk from "aws-cdk-lib";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
-import { DockerImageCode } from "aws-cdk-lib/aws-lambda";
+import { Code, DockerImageCode } from "aws-cdk-lib/aws-lambda";
 import { DbCustomResource } from "./dbCustomResource";
 import { DatabaseInstance, DatabaseProxy } from "aws-cdk-lib/aws-rds";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
@@ -40,7 +40,7 @@ export class InitializedRdsConstruct extends Construct {
       "initializer-custom-resource",
       {
         fnLogRetention: RetentionDays.ONE_DAY,
-        fnCode: DockerImageCode.fromImageAsset(`${__dirname}/rds-init-fn-code`),
+        fnCode: Code.fromAsset("lambda/initDb"),
         fnTimeout: cdk.Duration.minutes(5),
         securityGroups: [this.securityGroup],
         config: {

@@ -1,7 +1,9 @@
 import {
-  DockerImageCode,
+  AssetCode,
+  Code,
   DockerImageFunction,
   Function,
+  Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
@@ -11,7 +13,7 @@ import { Provider } from "aws-cdk-lib/custom-resources";
 import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export interface DbCustomResourceProps {
-  fnCode: DockerImageCode;
+  fnCode: AssetCode;
   fnLogRetention: RetentionDays;
   memorySize?: number;
   securityGroups: ISecurityGroup[];
@@ -36,15 +38,14 @@ export class DbCustomResource extends Construct {
     props: DbCustomResourceProps,
     id: string
   ): Function {
-    return new DockerImageFunction(this, "db-initializer-function", {
-      memorySize: props.memorySize || 128,
-      functionName: `${id}-lambdaFunction`,
-      code: props.fnCode,
+    return new Function(this, "reverb-event-lambda", {
       vpc: props.vpc,
       securityGroups: props.securityGroups,
+      runtime: Runtime.NODEJS_20_X,
+      code: props.fnCode,
+      handler: "index.handler",
       timeout: props.fnTimeout,
       logRetention: props.fnLogRetention,
-      // allowAllOutbound: true,
     });
   }
 

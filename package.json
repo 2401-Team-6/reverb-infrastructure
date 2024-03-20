@@ -5,11 +5,11 @@
     "infrastructure": "bin/infrastructure.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "prepare": "cd lambda && npm run build && cd ../"
+    "prepare": "cd lambda/events && npm run build && cd ../initDb && rm -rf node_modules && npm install",
+    "deploy": "npm run prepare && cdk deploy",
+    "synth": "npm run prepare && cdk synth"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
