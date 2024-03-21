@@ -20,16 +20,17 @@ export default class ApiConstruct extends Construct {
       },
     });
 
-    const apiKey = new api.ApiKey(this, "reverb-api-key", {
-      enabled: true,
-    });
-
     const apiDeployment = new api.Deployment(this, "ApiDeployment", {
       api: this.apigw,
     });
 
     const apiStage = new api.Stage(this, "ApiStage", {
       deployment: apiDeployment,
+      stageName: "reverb-prod-stage",
+    });
+
+    const apiKey = new api.ApiKey(this, "reverb-api-key", {
+      enabled: true,
     });
 
     const apiUsagePlan = new api.UsagePlan(this, "usage-plan", {

@@ -44,10 +44,6 @@ export class ReverbStack extends cdk.Stack {
       eventsLambda: reverbHandler,
     });
 
-    new cdk.CfnOutput(this, "reverb-apigw-url", {
-      value: apiGateway.apigw.url,
-    });
-
     const mongoConstruct = new MongoConstruct(this, "reverb-mongo", { vpc });
 
     const ecs = new EcsConstruct(this, "reverb-ecs", {
