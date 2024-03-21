@@ -47,8 +47,10 @@ export default class ApiConstruct extends Construct {
     });
 
     // Set lambda routes
-    const eventLambdaResource = this.apigw.root.addResource("events");
+    const eventsResource = this.apigw.root.addResource("events");
+    const webhooksResource = this.apigw.root.addResource("webhooks");
     const lambdaIntegration = new api.LambdaIntegration(props.eventsLambda);
-    eventLambdaResource.addMethod("POST", lambdaIntegration);
+    eventsResource.addMethod("POST", lambdaIntegration);
+    webhooksResource.addMethod("POST", lambdaIntegration);
   }
 }
