@@ -30,7 +30,6 @@ export default class ApiConstruct extends Construct {
 
     const apiStage = new api.Stage(this, "ApiStage", {
       deployment: apiDeployment,
-      stageName: "prod",
     });
 
     const apiUsagePlan = new api.UsagePlan(this, "usage-plan", {
@@ -47,7 +46,7 @@ export default class ApiConstruct extends Construct {
     });
 
     // Set lambda routes
-    const eventLambdaResource = this.apigw.root.addResource("/events");
+    const eventLambdaResource = this.apigw.root.addResource("events");
     const lambdaIntegration = new api.LambdaIntegration(props.eventsLambda);
     eventLambdaResource.addMethod("POST", lambdaIntegration);
   }
