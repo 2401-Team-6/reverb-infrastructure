@@ -3,7 +3,7 @@ const AWS = require("aws-sdk");
 const crypto = require("crypto");
 const secrets = new AWS.SecretsManager();
 
-exports.handler = async (event) => {
+exports.handler = async event => {
   console.log("Custom::DBInitializer event", event);
   switch (event.RequestType) {
     case "Create":
@@ -41,7 +41,7 @@ async function createEvent(event) {
       "CREATE TABLE events (id serial PRIMARY KEY, name varchar(30) UNIQUE NOT NULL)"
     );
     await connection.query(
-      "CREATE TABLE functions (id serial PRIMARY KEY, name varchar(30) UNIQUE NOT NULL, event_id integer REFERENCES events(id) ON DELETE CASCADE)"
+      "CREATE TABLE functions (id serial PRIMARY KEY, name varchar(30) UNIQUE NOT NULL, event_id integer REFERENCES events(id) ON DELETE CASCADE, cron varchar(100))"
     );
     await connection.query(
       "CREATE TABLE hash (hash char(28) UNIQUE NOT NULL DEFAULT '')"
