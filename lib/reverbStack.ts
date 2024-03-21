@@ -4,12 +4,14 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 import { InitializedRdsConstruct } from "./rds/initializedRdsConstruct";
 import { EcsConstruct } from "./ecs-containers/ecsContainer";
+import ApiConstruct from "./api/apiGatewayConstruct";
 import {
   Function,
   Code,
   Runtime,
   FunctionUrlAuthType,
 } from "aws-cdk-lib/aws-lambda";
+import * as api from "aws-cdk-lib/aws-apigateway";
 import { MongoConstruct } from "./mongo/mongoConstruct";
 
 export class ReverbStack extends cdk.Stack {
@@ -37,12 +39,9 @@ export class ReverbStack extends cdk.Stack {
     });
 
     rdsDatabase.secret.grantRead(reverbHandler);
-    const lambdaUrl = reverbHandler.addFunctionUrl({
-      authType: FunctionUrlAuthType.NONE,
-    });
 
-    new cdk.CfnOutput(this, "reverb-event-lambda-url", {
-      value: lambdaUrl.url,
+    const apiGateway = new ApiConstruct(this, "reverb-api-gateway", {
+      eventsLambda: reverbHandler,
     });
 
     const mongoConstruct = new MongoConstruct(this, "reverb-mongo", { vpc });
