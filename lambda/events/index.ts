@@ -1,15 +1,36 @@
-import { Handler } from "aws-lambda";
+import { Handler, APIGatewayEvent } from "aws-lambda";
 import { Client } from "pg";
 import { v4 as uuidv4 } from "uuid";
 import * as AWS from "aws-sdk";
 const secretsManager = new AWS.SecretsManager();
 
-export const handler: Handler = async event => {
-  if (
-    !event.body ||
-    typeof event.body !== "string" ||
-    JSON.parse(event.body).name === undefined
-  ) {
+export const handler: Handler = async (event: APIGatewayEvent) => {
+  let requestBody;
+  let requestType: "webhook" | "event";
+
+  if (event.path === "/webhooks") {
+    requestType = "webhook";
+  } else if (event.path === "/events") {
+    requestType = "event";
+  } else {
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "text/plain" },
+      body: `Cannot ${event.httpMethod} ${event.path}`,
+    };
+  }
+
+  try {
+    requestBody = JSON.parse(event.body as string);
+  } catch {
+    return {
+      statusCode: 400,
+      headers: { "Content-Type": "text/plain" },
+      body: "Invalid event request.",
+    };
+  }
+
+  if (requestType === "event" && !requestBody.name) {
     return {
       statusCode: 400,
       headers: { "Content-Type": "text/plain" },
@@ -32,9 +53,20 @@ export const handler: Handler = async event => {
     throw err as Error;
   }
 
-  const eventPayload = JSON.parse(event.body);
   const eventId = uuidv4();
-  eventPayload.id = eventId;
+  const eventPayload =
+    requestType === "event"
+      ? { name: requestBody.name, payload: requestBody.payload, id: eventId }
+      : {
+          name: "reverb_received_webhook",
+          payload: {
+            webhook: {
+              headers: requestBody.headers,
+              body: requestBody.body,
+            },
+          },
+          id: eventId,
+        };
 
   const client = new Client({
     host: process.env.RDS_PROXY_URL,
@@ -49,6 +81,7 @@ export const handler: Handler = async event => {
 
   try {
     await client.connect();
+
     await client.query(
       `SELECT graphile_worker.add_job('process_event', $1,'event_processing_queue');`,
       [eventPayload]
