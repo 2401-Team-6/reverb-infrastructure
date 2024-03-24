@@ -32,7 +32,7 @@ mongo <<EOF
 use logs
 
 // Create a collection
-db.createCollection("log")
+db.createCollection("logs")
 
 // Create a user with the password from Secrets Manager
 db.createUser({
