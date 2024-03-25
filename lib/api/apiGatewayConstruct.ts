@@ -1,6 +1,8 @@
 import { Construct } from "constructs";
 import * as api from "aws-cdk-lib/aws-apigateway";
 import { Function } from "aws-cdk-lib/aws-lambda";
+import { GetApiKeyCr } from "./getApiKeyCr";
+import { CfnOutput } from "aws-cdk-lib";
 
 interface APIConstructProps {
   readonly eventsLambda: Function;
@@ -22,6 +24,9 @@ export default class ApiConstruct extends Construct {
     });
 
     const apiKey = new api.ApiKey(this, "reverb-api-key");
+
+    const apiKeyCr = new GetApiKeyCr(this, "reverb-api-key-cr", { apiKey });
+    new CfnOutput(this, "apiKey", { value: apiKeyCr.apikeyValue });
 
     const apiUsagePlan = new api.UsagePlan(this, "usage-plan", {
       name: "reverb-api-usage-plan",
