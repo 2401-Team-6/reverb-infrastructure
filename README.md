@@ -1,14 +1,29 @@
-# Welcome to your CDK TypeScript project
+# reverb-infrastructure
 
-This is a blank project for CDK development with TypeScript.
+This is the CDK project to deploy Reverb to AWS.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Infrastructure
 
-## Useful commands
+![Infrastructure Image](images/reverb-infra.png)
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+## Use
+
+### Environmental Variables
+
+Only one environmental variable is required. Please provide, either in a `.env` file in the root of the repository or as an actual environmental variable `FUNCTIONS_SERVER_IMAGE`. `FUNCTIONS_SERVER_IMAGE` should be the repo string for your functions image. If it is on docker hub it should be your function server's image tag(`USER/APP_NAME`)
+
+### Deployment
+
+Prior to deploying make sure you have already:
+
+- Configured aws cli to your account
+- Installed cdk bootstrap
+  - `npm install -g aws-cdk`
+  - `cdk bootstrap`
+
+Once you have your environmental variable set and have bootstrapped, all you need to do is:
+
+```
+npm install
+npm run deploy
+```
