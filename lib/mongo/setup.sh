@@ -43,4 +43,8 @@ roles: [
 ]
 })
 
+db.logs.createIndex({ "message": 1, "timestamp": 1 })
+db.logs.createIndex({ "meta.funcId": 1 , "timestamp": 1 })
+db.logs.createIndex({ "meta.eventId": 1 })
+
 EOF
