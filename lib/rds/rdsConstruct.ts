@@ -70,7 +70,7 @@ export class RdsConstruct extends Construct {
       maxAllocatedStorage: 128,
       allowMajorVersionUpgrade: false,
       autoMinorVersionUpgrade: true,
-      backupRetention: cdk.Duration.days(0),
+      backupRetention: cdk.Duration.days(1),
       deleteAutomatedBackups: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       deletionProtection: false,
