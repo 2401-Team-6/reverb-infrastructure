@@ -56,5 +56,7 @@ export class EcsConstruct extends Construct {
       rdsSecret,
       mongoConstruct,
     });
+
+    workersContainer.node.addDependency(functionContainer);
   }
 }
