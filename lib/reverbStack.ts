@@ -24,8 +24,10 @@ export class ReverbStack extends cdk.Stack {
       vpc,
     });
 
+    const mongoConstruct = new MongoConstruct(this, "reverb-mongo", { vpc });
+
     const reverbHandler = new Function(this, "reverb-event-lambda", {
-      vpc: vpc,
+      vpc,
       securityGroups: [rdsDatabase.securityGroup],
       runtime: Runtime.NODEJS_20_X,
       code: Code.fromAsset("lambda/events/deploy-bundle"),
@@ -40,11 +42,25 @@ export class ReverbStack extends cdk.Stack {
 
     rdsDatabase.secret.grantRead(reverbHandler);
 
-    const apiGateway = new ApiConstruct(this, "reverb-api-gateway", {
-      eventsLambda: reverbHandler,
+    const logsHandler = new Function(this, "reverb-log-lambda", {
+      vpc,
+      securityGroups: [mongoConstruct.securityGroup],
+      runtime: Runtime.NODEJS_20_X,
+      code: Code.fromAsset("lambda/logs/deploy-bundle"),
+      handler: "index.handler",
+      environment: {
+        MONGO_SERVER_URL:
+          mongoConstruct.mongo.instancePrivateIp + ":27017/logs",
+        MONGO_SECRET_ARN: mongoConstruct.mongoCredentialsSecret.secretArn,
+      },
     });
 
-    const mongoConstruct = new MongoConstruct(this, "reverb-mongo", { vpc });
+    mongoConstruct.mongoCredentialsSecret.grantRead(logsHandler);
+
+    const apiGateway = new ApiConstruct(this, "reverb-api-gateway", {
+      eventsLambda: reverbHandler,
+      logsLambda: logsHandler,
+    });
 
     const ecs = new EcsConstruct(this, "reverb-ecs", {
       vpc,

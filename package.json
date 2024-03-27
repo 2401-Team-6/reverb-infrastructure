@@ -5,7 +5,7 @@
     "infrastructure": "bin/infrastructure.js"
   },
   "scripts": {
-    "prepare": "cd lambda/events && npm run build && cd ../initDb && rm -rf node_modules && npm install",
+    "prepare": "cd lambda/events && npm run build && cd ../logs && npm run build && cd ../initDb && rm -rf node_modules && npm install",
     "deploy": "npm run prepare && cdk deploy",
     "synth": "npm run prepare && cdk synth",
     "destroy": "cdk destroy"
