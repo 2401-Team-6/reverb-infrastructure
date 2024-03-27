@@ -2,12 +2,12 @@
 export AWS_DEFAULT_REGION=us-east-1
 
 # Add MongoDB repository
-echo "[mongodb-org-4.4]
+echo "[mongodb-org-7.0]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/7.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc" | sudo tee /etc/yum.repos.d/mongodb-org-4.4.repo
+gpgkey=https://pgp.mongodb.com/server-7.0.asc" | sudo tee /etc/yum.repos.d/mongodb-org-7.0.repo
 
 # Update and install MongoDB, AWS CLI, and jq
 sudo yum update -y
@@ -28,7 +28,7 @@ MONGO_USERNAME=$(echo $MONGO_CREDENTIALS | jq -r .username)
 MONGO_PASSWORD=$(echo $MONGO_CREDENTIALS | jq -r .password)
 
 # MongoDB commands to setup database, collection, and user
-mongo <<EOF
+mongosh <<EOF
 use logs
 
 // Create a collection
