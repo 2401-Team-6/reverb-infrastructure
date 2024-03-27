@@ -6,6 +6,7 @@ import { CfnOutput } from "aws-cdk-lib";
 
 interface APIConstructProps {
   readonly eventsLambda: Function;
+  readonly logsLambda: Function;
 }
 
 export default class ApiConstruct extends Construct {
@@ -46,10 +47,38 @@ export default class ApiConstruct extends Construct {
     // Set lambda routes
     const eventsResource = this.apigw.root.addResource("events");
     const webhooksResource = this.apigw.root.addResource("webhooks");
-    const lambdaIntegration = new api.LambdaIntegration(props.eventsLambda);
-    eventsResource.addMethod("POST", lambdaIntegration, {
+    const rootLogsResource = this.apigw.root.addResource("logs");
+    const eventsLogsResource = rootLogsResource.addResource("events");
+    const specificEventLogResource = eventsLogsResource.addResource("{id}");
+    const functionsLogsResource = rootLogsResource.addResource("functions");
+    const specificFunctionLogsResource =
+      functionsLogsResource.addResource("{id}");
+    const deadLetterLogsResource = rootLogsResource.addResource("dead-letter");
+
+    const eventsIntegration = new api.LambdaIntegration(props.eventsLambda);
+    eventsResource.addMethod("POST", eventsIntegration, {
       apiKeyRequired: true,
     });
-    webhooksResource.addMethod("POST", lambdaIntegration);
+    webhooksResource.addMethod("POST", eventsIntegration);
+
+    const logsIntegration = new api.LambdaIntegration(props.logsLambda);
+    rootLogsResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
+    eventsLogsResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
+    specificEventLogResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
+    functionsLogsResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
+    specificFunctionLogsResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
+    deadLetterLogsResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
   }
 }
