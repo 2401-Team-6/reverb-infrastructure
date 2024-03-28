@@ -31,7 +31,7 @@ app.post("/webhooks", async (req, res) => {
 
     res.status(200).send();
   } catch {
-    res.status(500).json({ error: "Error processing event." });
+    res.status(500).json({ error: "Error processing webhook event." });
   }
 });
 
