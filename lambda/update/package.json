@@ -1,0 +1,21 @@
+{
+  "name": "reverb-update-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf deploy-bundle && rm -rf node_modules && npm install && npx tsc && cp -R node_modules deploy-bundle"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1573.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.136",
+    "typescript": "^5.4.2"
+  }
+}

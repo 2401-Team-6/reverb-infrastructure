@@ -14,6 +14,8 @@ interface EcsProps {
 
 export class EcsConstruct extends Construct {
   public securityGroup: ec2.SecurityGroup;
+  public fns: FnContainer;
+  public cluster: ecs.Cluster;
 
   constructor(
     scope: Construct,
@@ -22,12 +24,12 @@ export class EcsConstruct extends Construct {
   ) {
     super(scope, id);
 
-    const cluster = new ecs.Cluster(this, "reverb-cluster", {
+    this.cluster = new ecs.Cluster(this, "reverb-cluster", {
       clusterName: "reverb-services",
       vpc,
     });
 
-    const namespace = cluster.addDefaultCloudMapNamespace({
+    const namespace = this.cluster.addDefaultCloudMapNamespace({
       name: "reverb-services",
       vpc,
       useForServiceConnect: true,
@@ -40,9 +42,9 @@ export class EcsConstruct extends Construct {
     );
     this.securityGroup = servicesSecurityGroup;
 
-    const functionContainer = new FnContainer(this, "functions-container", {
+    this.fns = new FnContainer(this, "functions-container", {
       namespace,
-      cluster,
+      cluster: this.cluster,
       vpc,
       servicesSecurityGroup,
       rdsSecret,
@@ -50,13 +52,13 @@ export class EcsConstruct extends Construct {
 
     const workersContainer = new WorkersContainer(this, "workers-container", {
       namespace,
-      cluster,
+      cluster: this.cluster,
       vpc,
       servicesSecurityGroup,
       rdsSecret,
       mongoConstruct,
     });
 
-    workersContainer.node.addDependency(functionContainer);
+    workersContainer.node.addDependency(this.fns);
   }
 }
