@@ -4,23 +4,23 @@ import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { ContainerProps } from "./containerTypes";
 import { FUNCTIONS_URI } from "../../utils/processEnvironment";
+import { CfnResource } from "aws-cdk-lib";
 
 export class FnContainer extends Construct {
+  public taskDef: ecs.FargateTaskDefinition;
+  public service: ecs.FargateService;
+
   constructor(scope: Construct, id: string, props: ContainerProps) {
     super(scope, id);
 
     const fnImage = ecs.ContainerImage.fromRegistry(FUNCTIONS_URI);
 
-    const fnServiceTaskDef = new ecs.FargateTaskDefinition(
-      this,
-      "fn-service-taskDef",
-      {
-        cpu: 512,
-        memoryLimitMiB: 1024,
-      }
-    );
+    this.taskDef = new ecs.FargateTaskDefinition(this, "fn-service-taskdef", {
+      cpu: 512,
+      memoryLimitMiB: 1024,
+    });
 
-    const fnServiceContainer = fnServiceTaskDef.addContainer(
+    const fnServiceContainer = this.taskDef.addContainer(
       "fn-service-container",
       {
         containerName: "fn-service-container",
@@ -42,9 +42,9 @@ export class FnContainer extends Construct {
       protocol: ecs.Protocol.TCP,
     });
 
-    const fnService = new ecs.FargateService(this, "fn-service", {
+    this.service = new ecs.FargateService(this, "fn-service", {
       cluster: props.cluster,
-      taskDefinition: fnServiceTaskDef,
+      taskDefinition: this.taskDef,
       serviceName: "fn-service",
       securityGroups: [props.servicesSecurityGroup],
       serviceConnectConfiguration: {
@@ -63,7 +63,7 @@ export class FnContainer extends Construct {
       },
     });
 
-    const scalableTarget = fnService.autoScaleTaskCount({
+    const scalableTarget = this.service.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: 10,
     });
@@ -72,7 +72,7 @@ export class FnContainer extends Construct {
       targetUtilizationPercent: 75,
     });
 
-    fnService.connections.allowFrom(
+    this.service.connections.allowFrom(
       props.servicesSecurityGroup,
       ec2.Port.tcp(3000),
       "Allow traffic within security group on 3000"

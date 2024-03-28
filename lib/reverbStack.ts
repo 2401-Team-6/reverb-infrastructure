@@ -1,17 +1,12 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 import { Construct } from "constructs";
 import { InitializedRdsConstruct } from "./rds/initializedRdsConstruct";
 import { EcsConstruct } from "./ecs-containers/ecsContainer";
 import ApiConstruct from "./api/apiGatewayConstruct";
-import {
-  Function,
-  Code,
-  Runtime,
-  FunctionUrlAuthType,
-} from "aws-cdk-lib/aws-lambda";
-import * as api from "aws-cdk-lib/aws-apigateway";
+import { Function, Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { MongoConstruct } from "./mongo/mongoConstruct";
 
 export class ReverbStack extends cdk.Stack {
@@ -68,5 +63,52 @@ export class ReverbStack extends cdk.Stack {
       mongoConstruct,
     });
     ecs.node.addDependency(rdsDatabase);
+
+    const updateLambda = new Function(this, "reverb-update-lambda", {
+      vpc,
+      runtime: Runtime.NODEJS_20_X,
+      code: Code.fromAsset("lambda/update/deploy-bundle"),
+      handler: "index.handler",
+      environment: {
+        TASK_DEF_FAMILY: ecs.fns.taskDef.family,
+        SERVICE: ecs.fns.service.serviceName,
+        CLUSTER: ecs.cluster.clusterName,
+      },
+    });
+
+    updateLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "ecs:RegisterTaskDefinition",
+          "ecs:ListTaskDefinitions",
+          "ecs:DescribeTaskDefinition",
+        ],
+        resources: ["*"],
+      })
+    );
+
+    updateLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ecs:UpdateService", "ecs:DescribeServices"],
+        resources: [ecs.fns.service.serviceArn],
+      })
+    );
+
+    updateLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["iam:PassRole"],
+        resources: [
+          ecs.fns.taskDef.executionRole!.roleArn,
+          ecs.fns.taskDef.taskRole.roleArn,
+        ],
+      })
+    );
+
+    new cdk.CfnOutput(this, "update-lambda-name", {
+      value: updateLambda.functionName,
+    });
   }
 }
