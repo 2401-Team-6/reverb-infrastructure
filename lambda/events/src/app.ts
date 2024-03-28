@@ -15,7 +15,7 @@ app.post("/events", async (req: Request<{}, {}, Event>, res) => {
   const id = v4();
   try {
     await addEvent({ name: req.body.name, payload: req.body.payload, id });
-    res.status(200).json({ message: "Event processed", id });
+    res.status(202).json({ message: "Event processed", id });
   } catch {
     res.status(500).json({ error: "Error processing event." });
   }
