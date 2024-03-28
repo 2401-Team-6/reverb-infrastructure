@@ -50,6 +50,7 @@ export default class ApiConstruct extends Construct {
     const rootLogsResource = this.apigw.root.addResource("logs");
     const eventsLogsResource = rootLogsResource.addResource("events");
     const specificEventLogResource = eventsLogsResource.addResource("{id}");
+    const errorsEventLogsResrouce = rootLogsResource.addResource("errors");
     const functionsLogsResource = rootLogsResource.addResource("functions");
     const specificFunctionLogsResource =
       functionsLogsResource.addResource("{id}");
@@ -78,6 +79,9 @@ export default class ApiConstruct extends Construct {
       apiKeyRequired: true,
     });
     deadLetterLogsResource.addMethod("GET", logsIntegration, {
+      apiKeyRequired: true,
+    });
+    errorsEventLogsResrouce.addMethod("GET", logsIntegration, {
       apiKeyRequired: true,
     });
   }
