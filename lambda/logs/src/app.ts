@@ -9,6 +9,7 @@ import {
   setFilterTimestamp,
   setFilterCursor,
   setLogLinks,
+  setFilterName,
 } from "./mongoService";
 
 import type {
@@ -58,6 +59,7 @@ app.get("/logs/events", async (req: Request, res) => {
 
   try {
     setFilterTimestamp(req, filter);
+    setFilterName(req, filter, "/events");
   } catch (e) {
     if (!(e instanceof Error)) return;
 
@@ -96,6 +98,7 @@ app.get("/logs/functions", async (req: Request, res) => {
 
   try {
     setFilterTimestamp(req, filter);
+    setFilterName(req, filter, "/functions");
   } catch (e) {
     if (!(e instanceof Error)) return;
 
