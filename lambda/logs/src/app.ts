@@ -1,4 +1,5 @@
 import express, { Request } from "express";
+import cors from "cors";
 
 import {
   getCursorPaginatedLogs,
@@ -19,6 +20,8 @@ import type {
 } from "./types";
 
 const app = express();
+
+app.use(cors());
 
 app.get("/logs", async (req: Request, res) => {
   const filter: QueryFilter = {};
