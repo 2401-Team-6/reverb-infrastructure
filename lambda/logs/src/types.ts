@@ -14,7 +14,10 @@ export interface QueryFilter {
   timestamp?: { $gte: Date; $lte: Date };
   "meta.taskType"?: "event" | "function";
   "meta.funcId"?: string | { $in: string[] };
+  "meta.funcName"?: string;
+  "meta.eventName"?: string;
 }
+
 export interface AggregateGroup {
   _id: string;
   message?: { $last: "$message" };

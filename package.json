@@ -6,8 +6,8 @@
   },
   "scripts": {
     "prepare": "cd lambda/events && npm run build && cd ../logs && npm run build && cd ../initDb && rm -rf node_modules && npm install && cd ../update && npm run build",
-    "deploy": "npm run prepare && cdk deploy",
-    "synth": "npm run prepare && cdk synth",
+    "deploy": "cdk deploy",
+    "synth": "cdk synth",
     "destroy": "cdk destroy"
   },
   "devDependencies": {
