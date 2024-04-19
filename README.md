@@ -1,6 +1,6 @@
 # reverb-infrastructure
 
-This is the CDK project to deploy Reverb to AWS.
+This is the CDK project to deploy your Reverb workflow engine infrastructure to AWS.
 
 ## Infrastructure
 
@@ -10,14 +10,14 @@ This is the CDK project to deploy Reverb to AWS.
 
 ### Deployment
 
-Prior to deploying make sure you have already:
+Before deploying, make sure you have already:
 
-- Configured aws cli to your account
-- Installed cdk bootstrap
+- Configured the AWS CLI with your AWS account
+- Installed the CDK bootstrap
   - `npm install -g aws-cdk`
   - `cdk bootstrap`
 
-Once you have have bootstrapped, all you need to do is:
+Once you have bootstrapped, all you need to do is run:
 
 ```
 npm install
