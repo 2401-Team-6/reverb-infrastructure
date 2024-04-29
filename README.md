@@ -4,7 +4,7 @@ This is the CDK project to deploy your Reverb workflow engine infrastructure to 
 
 ## Infrastructure
 
-![Infrastructure Image](images/reverb-infra.png)
+![Infrastructure Image](images/reverb-infra2.png)
 
 ## Use
 
