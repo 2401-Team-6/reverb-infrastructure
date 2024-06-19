@@ -26,4 +26,4 @@ npm run deploy
 
 ### Function Server Deployment
 
-TODO: Add information about creating and deploy function service to infrastructure
+The AWS CDK initially deploys an ECS container without any workflow definitions. In order to define event or cron-triggered workflows and deploy them with Reverb's automated CI/CD, follow the instructions in the [Reverb Repository README](https://github.com/reverb-app/reverb)
